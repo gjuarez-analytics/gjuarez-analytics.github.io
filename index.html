@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerardo Juarez — Supply Chain Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8e6e0;
+    --muted: #7a7870;
+    --accent: #c8a96e;
+    --accent2: #7eb8c9;
+    --accent3: #9b8ec4;
+    --green: #6db88a;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── GRID LINES ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,169,110,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,169,110,0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 3rem;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 8rem 3rem 4rem;
+    z-index: 1;
+  }
+
+  .hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-name {
+    font-family: var(--serif);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 1.0;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.35s forwards;
+  }
+
+  .hero-name em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.8;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.65s forwards;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.875rem 2rem;
+    background: var(--accent);
+    color: #0a0a0f;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: #d4b97e;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.875rem 2rem;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  /* ── HERO STATS ── */
+  .hero-stats {
+    position: absolute;
+    right: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    opacity: 0;
+    animation: fadeLeft 0.8s 1s forwards;
+  }
+
+  .stat {
+    text-align: right;
+  }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 2.5rem;
+    color: var(--accent);
+    line-height: 1;
+    display: block;
+  }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── SECTION BASE ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 60px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 3rem;
+  }
+
+  .section-title em { color: var(--accent); font-style: italic; }
+
+  /* ── SKILLS ── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 4rem;
+  }
+
+  .skill-cell {
+    background: var(--surface);
+    padding: 1.75rem;
+    transition: background 0.2s;
+  }
+
+  .skill-cell:hover { background: var(--surface2); }
+
+  .skill-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .skill-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.02em;
+  }
+
+  .skill-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .skill-bar-wrap {
+    margin-top: 0.75rem;
+    height: 2px;
+    background: var(--border2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skill-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── PROJECTS ── */
+  .projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .project-card {
+    background: var(--surface);
+    padding: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: start;
+    transition: background 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .project-card:hover { background: var(--surface2); }
+
+  .project-card:hover .project-arrow { transform: translate(4px, -4px); }
+
+  .project-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+  }
+
+  .project-title {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+
+  .project-subtitle {
+    font-size: 13px;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  .project-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 600px;
+    margin-bottom: 1.5rem;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .tag.accent { border-color: rgba(200,169,110,0.3); color: var(--accent); }
+  .tag.blue { border-color: rgba(126,184,201,0.3); color: var(--accent2); }
+  .tag.purple { border-color: rgba(155,142,196,0.3); color: var(--accent3); }
+
+  .project-arrow {
+    font-size: 1.5rem;
+    color: var(--accent);
+    transition: transform 0.2s;
+    margin-top: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* ── METHODOLOGY ── */
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .method-card {
+    background: var(--surface);
+    padding: 2rem;
+  }
+
+  .method-num {
+    font-family: var(--serif);
+    font-size: 3rem;
+    color: var(--border2);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .method-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .method-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── CONTACT ── */
+  .contact-wrap {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .contact-left {}
+
+  .contact-title {
+    font-family: var(--serif);
+    font-size: 2.5rem;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .contact-title em { color: var(--accent); font-style: italic; }
+
+  .contact-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s;
+    background: var(--surface2);
+  }
+
+  .contact-link:hover {
+    border-color: var(--accent);
+    background: rgba(200,169,110,0.05);
+  }
+
+  .contact-link-icon {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+  }
+
+  .contact-link-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    flex: 1;
+  }
+
+  .contact-link-arrow {
+    font-size: 12px;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .contact-link:hover .contact-link-arrow { opacity: 1; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .footer-built {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .footer-built span { color: var(--accent); }
+
+  /* ── DIVIDER LINE ── */
+  .full-divider {
+    position: relative;
+    z-index: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 100%;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translate(24px, -50%); }
+    to   { opacity: 1; transform: translate(0, -50%); }
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── TABLEAU EMBED PLACEHOLDER ── */
+  .embed-placeholder {
+    background: var(--surface2);
+    border: 1px dashed var(--border2);
+    padding: 3rem;
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  .embed-placeholder-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .embed-placeholder-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  /* ── CURSOR DOT ── */
+  .cursor {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: difference;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero { padding: 7rem 1.5rem 4rem; }
+    .hero-stats { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .method-grid { grid-template-columns: 1fr; }
+    .contact-wrap { grid-template-columns: 1fr; padding: 2rem; gap: 2rem; }
+    .project-card { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">GJ_ANALYTICS</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <p class="hero-tag">// Supply Chain Analytics Portfolio</p>
+    <h1 class="hero-name">Gerardo<br><em>Juarez</em></h1>
+    <p class="hero-title">Turning supply chain complexity into clarity</p>
+    <p class="hero-desc">Senior Supply Chain Analyst with 6+ years building data infrastructure from scratch — Oracle ERP integrations, Power BI models, and Tableau analytics for automotive parts distribution across North America.</p>
+    <div class="hero-ctas">
+      <a href="#projects" class="btn-primary">View Projects →</a>
+      <a href="#contact" class="btn-secondary">Get in Touch</a>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num">8+</span>
+      <span class="stat-label">Dashboards built</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">3</span>
+      <span class="stat-label">Countries covered</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">22</span>
+      <span class="stat-label">Data relationships</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">95%</span>
+      <span class="stat-label">OTD target</span>
+    </div>
+  </div>
+</div>
+
+<div class="full-divider"></div>
+
+<!-- ABOUT / SKILLS -->
+<section id="about">
+  <div class="section-label">Skills & Tools</div>
+  <h2 class="section-title">Built for <em>real</em><br>operational problems</h2>
+
+  <div class="skills-grid reveal">
+    <div class="skill-cell">
+      <span class="skill-icon">📊</span>
+      <div class="skill-name">Power BI + DAX</div>
+      <div class="skill-desc">Star schema modeling, complex DAX measures, Power Query M transformations</div>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:92%"></div></div>
+    </div>
+    <div class="skill-cell">
+      <span class="skill-icon">📈</span>
+      <div class="skill-name">Tableau</div>
+      <div class="skill-desc">LOD expressions, table calculations, geospatial analytics, dashboard actions</div>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:78%"></div></div>
+    </div>
+    <div class="skill-cell">
+      <span class="skill-icon">🔗</span>
+      <div class="skill-name">Oracle ERP</div>
+      <div class="skill-desc">Order management, inventory data extraction, ERP business logic interpretation</div>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:85%"></div></div>
+    </div>
+    <div class="skill-cell">
+      <span class="skill-icon">🚚</span>
+      <div class="skill-name">APICS / Supply Chain</div>
+      <div class="skill-desc">Perfect Order methodology, OTD, Fill Rate, BO analysis, demand planning</div>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:88%"></div></div>
+    </div>
+    <div class="skill-cell">
+      <span class="skill-icon">📋</span>
+      <div class="skill-name">Excel Advanced</div>
+      <div class="skill-desc">Complex models, Power Pivot, data architecture for finance and operations</div>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:95%"></div></div>
+    </div>
+    <div class="skill-cell">
+      <span class="skill-icon">🗄️</span>
+      <div class="skill-name">Data Modeling</div>
+      <div class="skill-desc">Star schema design, relationship management, granularity control</div>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:82%"></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label">Featured Projects</div>
+  <h2 class="section-title">Analytics built<br>from <em>zero</em></h2>
+
+  <div class="projects-list">
+
+    <!-- Project 1 -->
+    <a class="project-card reveal" href="#" onclick="return false;">
+      <div>
+        <div class="project-num">01 — Power BI</div>
+        <div class="project-title">Canada Shipment BI Dashboard</div>
+        <div class="project-subtitle">Mexico → Pharr TX → Canada automotive parts distribution</div>
+        <div class="project-desc">
+          First-ever analytical infrastructure built from scratch for a 3PL distribution network. 8 dashboard pages covering the full order lifecycle from Customer PO to final delivery, with APICS Perfect Order methodology applied throughout. Surfaced a key insight: 80%+ of customers order within the planning window — the backorder problem is supply-side, not demand-side.
+        </div>
+        <div class="project-tags">
+          <span class="tag accent">Power BI</span>
+          <span class="tag accent">DAX</span>
+          <span class="tag accent">Power Query M</span>
+          <span class="tag blue">Oracle ERP</span>
+          <span class="tag blue">APICS</span>
+          <span class="tag">22 relationships</span>
+          <span class="tag">20+ M queries</span>
+          <span class="tag purple">OTD · Fill Rate · BO Rate</span>
+        </div>
+        <div class="embed-placeholder" style="margin-top:1.5rem;">
+          <span class="embed-placeholder-icon">📊</span>
+          <div class="embed-placeholder-text">[ Power BI Dashboard — Embed or screenshot here ]</div>
+        </div>
+      </div>
+      <div class="project-arrow">↗</div>
+    </a>
+
+    <!-- Project 2 -->
+    <a class="project-card reveal" href="#" onclick="return false;">
+      <div>
+        <div class="project-num">02 — Tableau</div>
+        <div class="project-title">OTD Geospatial Analysis</div>
+        <div class="project-subtitle">3PL warehouse locations · route efficiency · distance correlations</div>
+        <div class="project-desc">
+          Extended the Power BI analysis with geospatial correlations — mapping 3PL warehouse locations (Bison East/West, Speedy) against destination cities across Canada. Haversine distance calculations reveal whether distance actually explains late deliveries, or if 3PL assignment is the real variable. Includes R² scatter analysis and interactive APICS quadrant segmentation.
+        </div>
+        <div class="project-tags">
+          <span class="tag accent">Tableau</span>
+          <span class="tag accent">LOD Expressions</span>
+          <span class="tag accent">Table Calculations</span>
+          <span class="tag blue">Haversine Formula</span>
+          <span class="tag blue">Dual-layer Maps</span>
+          <span class="tag purple">R² · Trend Lines</span>
+          <span class="tag purple">Parameters · Sets</span>
+        </div>
+        <div class="embed-placeholder" style="margin-top:1.5rem;">
+          <span class="embed-placeholder-icon">🗺️</span>
+          <div class="embed-placeholder-text">[ Tableau Public Dashboard — Embed iframe here ]</div>
+        </div>
+      </div>
+      <div class="project-arrow">↗</div>
+    </a>
+
+    <!-- Project 3 -->
+    <a class="project-card reveal" href="#" onclick="return false;">
+      <div>
+        <div class="project-num">03 — Excel + Power BI</div>
+        <div class="project-title">Personal Finance Master System</div>
+        <div class="project-subtitle">ISR/SAT projections · debt tracking · household budgeting</div>
+        <div class="project-desc">
+          Clean architecture separating data storage (Excel, 11 sheets) from all calculations and visualizations (Power BI). Demonstrates the same data engineering principles applied to personal finance — no formulas in the data layer, all logic in Power BI. Star schema, correct granularity, and documented business logic applied outside the corporate context.
+        </div>
+        <div class="project-tags">
+          <span class="tag accent">Power BI</span>
+          <span class="tag accent">Excel Architecture</span>
+          <span class="tag blue">Financial Modeling</span>
+          <span class="tag blue">Personal Finance</span>
+          <span class="tag">Clean data layer</span>
+        </div>
+      </div>
+      <div class="project-arrow">↗</div>
+    </a>
+
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<!-- METHODOLOGY -->
+<section id="methodology">
+  <div class="section-label">How I Work</div>
+  <h2 class="section-title">From raw data<br>to <em>decisions</em></h2>
+
+  <div class="method-grid reveal">
+    <div class="method-card">
+      <div class="method-num">01</div>
+      <div class="method-title">Understand the business first</div>
+      <div class="method-desc">No dashboard before understanding the operational problem. What decision does this data need to support? Who makes it and how often?</div>
+    </div>
+    <div class="method-card">
+      <div class="method-num">02</div>
+      <div class="method-title">Build the data architecture right</div>
+      <div class="method-desc">Clean separation between data storage and analysis. Star schema, correct granularity, documented business logic. The foundation determines everything.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-num">03</div>
+      <div class="method-title">Let the data challenge assumptions</div>
+      <div class="method-desc">The most valuable insights are the ones that contradict what management thinks they already know. Build for discovery, not just confirmation.</div>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-wrap reveal">
+    <div class="contact-left">
+      <div class="section-label" style="margin-bottom:1rem;">Contact</div>
+      <h2 class="contact-title">Let's talk<br><em>supply chain</em><br>analytics</h2>
+      <p class="contact-desc" style="margin-top:1rem;">Open to senior analyst roles, BI consulting, and supply chain analytics projects across North America and LATAM.</p>
+    </div>
+    <div class="contact-links">
+      <a href="https://linkedin.com/in/gera96aj" class="contact-link" target="_blank">
+        <span class="contact-link-icon">in</span>
+        <span class="contact-link-label">LinkedIn</span>
+        <span class="contact-link-arrow">↗</span>
+      </a>
+      <a href="https://public.tableau.com/app/profile/gerardo.juarez1563" class="contact-link" target="_blank">
+        <span class="contact-link-icon">📊</span>
+        <span class="contact-link-label">Tableau Public</span>
+        <span class="contact-link-arrow">↗</span>
+      </a>
+      <a href="https://github.com/gjuarez-analytics" class="contact-link" target="_blank">
+        <span class="contact-link-icon">⌥</span>
+        <span class="contact-link-label">GitHub</span>
+        <span class="contact-link-arrow">↗</span>
+      </a>
+      <a href="mailto:gera96aj@gmail.com" class="contact-link">
+        <span class="contact-link-icon">✉</span>
+        <span class="contact-link-label">gera96aj@gmail.com</span>
+        <span class="contact-link-arrow">↗</span>
+      </a>
+      <a href="tel:+528992306988" class="contact-link">
+        <span class="contact-link-icon">☎</span>
+        <span class="contact-link-label">+52 899 230 6988</span>
+        <span class="contact-link-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2026 Gerardo Juarez — León, Guanajuato, MX</div>
+  <div class="footer-built">Built with <span>precision</span> · Powered by data</div>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX - 4 + 'px';
+    cursor.style.top  = e.clientY - 4 + 'px';
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Skill bars animate on scroll
+  const skillBars = document.querySelectorAll('.skill-bar');
+  const barObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.width = entry.target.style.width;
+        barObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 
