@@ -37,15 +37,16 @@
     overflow-x: hidden;
   }
 
-  /* ── NOISE TEXTURE OVERLAY ── */
-  body::before {
-    content: '';
+  /* ── NEURAL NETWORK CANVAS ── */
+  #neural-canvas {
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
-    opacity: 0.4;
+    opacity: 1;
+  }
+  @media (max-width: 768px) {
+    #neural-canvas { display: none; }
   }
 
   /* ── GRID LINES ── */
@@ -646,6 +647,7 @@
 </head>
 <body>
 
+<canvas id="neural-canvas"></canvas>
 <div class="cursor" id="cursor"></div>
 
 <!-- NAV -->
@@ -876,9 +878,9 @@
         <span class="contact-link-label">GitHub</span>
         <span class="contact-link-arrow">↗</span>
       </a>
-      <a href="mailto:gera96aj@gmail.com" class="contact-link">
+      <a href="/cdn-cgi/l/email-protection#e483819685ddd2858ea48389858d88ca878b89" class="contact-link">
         <span class="contact-link-icon">✉</span>
-        <span class="contact-link-label">gera96aj@gmail.com</span>
+        <span class="contact-link-label"><span class="__cf_email__" data-cfemail="caadafb8abf3fcaba08aada7aba3a6e4a9a5a7">[email&#160;protected]</span></span>
         <span class="contact-link-arrow">↗</span>
       </a>
       <a href="tel:+528992306988" class="contact-link">
@@ -892,11 +894,92 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-copy">© 2026 Gerardo Juarez — León, Guanajuato, MX</div>
+  <div class="footer-copy">© 2026 Gerardo Juárez — Monterrey · Querétaro · Reynosa</div>
   <div class="footer-built">Built with <span>precision</span> · Powered by data</div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Neural Network Background
+  (function() {
+    const canvas = document.getElementById('neural-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const ACCENT = 'rgba(200,169,110,';
+    const ACCENT2 = 'rgba(126,184,201,';
+    let W, H, nodes;
+    const NODE_COUNT = 55;
+    const MAX_DIST = 160;
+    const SPEED = 0.25;
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function makeNode() {
+      return {
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * SPEED,
+        vy: (Math.random() - 0.5) * SPEED,
+        r: Math.random() * 1.8 + 0.8,
+        pulse: Math.random() * Math.PI * 2
+      };
+    }
+
+    function init() {
+      resize();
+      nodes = Array.from({ length: NODE_COUNT }, makeNode);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Update positions
+      nodes.forEach(n => {
+        n.pulse += 0.012;
+        n.x += n.vx;
+        n.y += n.vy;
+        if (n.x < 0 || n.x > W) n.vx *= -1;
+        if (n.y < 0 || n.y > H) n.vy *= -1;
+      });
+
+      // Draw edges
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < MAX_DIST) {
+            const alpha = (1 - dist / MAX_DIST) * 0.18;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = ACCENT + alpha + ')';
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw nodes
+      nodes.forEach(n => {
+        const glow = 0.5 + 0.5 * Math.sin(n.pulse);
+        const alpha = 0.25 + 0.35 * glow;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r + glow * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = (Math.random() > 0.85 ? ACCENT2 : ACCENT) + alpha + ')';
+        ctx.fill();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { resize(); });
+    init();
+    draw();
+  })();
+
   // Cursor
   const cursor = document.getElementById('cursor');
   document.addEventListener('mousemove', e => {
@@ -918,11 +1001,4 @@
 
   // Skill bars animate on scroll
   const skillBars = document.querySelectorAll('.skill-bar');
-  const barObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.width = entry.target.style.width;
-        barObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 
+  const barObserver = ne
